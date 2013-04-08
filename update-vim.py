@@ -2,6 +2,8 @@
 
 import os
 import git
+import sys
+from git.exc import GitCommandError
 
 
 def update_vim(vim_dir=None):
@@ -19,8 +21,11 @@ def update_vim(vim_dir=None):
             try:
                 repo = git.Repo(os.path.join(vim_dir, bundle))
                 update_if_requested(repo, bundle)
-            except:
-                raise
+            except GitCommandError, e:
+                if str(e).find('unable to connect') != -1:
+                    e = str(e).split("'")[1][:-1]
+                    print e
+                    sys.exit(1)
 
 
 def update_if_requested(rpo, name, searched_submodules=None):

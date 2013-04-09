@@ -41,7 +41,11 @@ def update_if_requested(rpo, name, searched_submodules=None):
     if searched_submodules is None:
         searched_submodules = []
     local_sha = rpo.head.commit.hexsha
-    remote_sha = rpo.remote().fetch()[0].commit.hexsha
+    try:
+        remote_sha = rpo.remote().fetch()[0].commit.hexsha
+    except AssertionError:
+        print 'likely caused by rebased / merged upstream'
+        raise
     if local_sha != remote_sha:
         query = 'Update repository {} [y or n]? : '.format(name)
         choice = str(raw_input(query))

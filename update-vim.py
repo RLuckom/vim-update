@@ -38,6 +38,7 @@ def update_if_requested(rpo, name, searched_submodules=None):
     @type searched_submodules: list
     @param searched_submodules: list of names of previously-searched submodules
     """
+    changed = False
     if searched_submodules is None:
         searched_submodules = []
     local_sha = rpo.head.commit.hexsha
@@ -51,17 +52,19 @@ def update_if_requested(rpo, name, searched_submodules=None):
         choice = str(raw_input(query))
         if choice in ['y', 'Y', 'yes', 'Yes']:
             pull_repo_changes(rpo)
+            changed = True
         else:
             print 'Skipping {}.'.format(name)
     elif rpo.submodules == []:
         print 'No update necessary in {}'.format(name)
-    for mod in rpo.submodules:
-        if mod.name not in searched_submodules:
-            searched_submodules.append(mod.name)
-            mod_name = mod.name.split('/')[-1]
-            full_name = '{}, submodule of {}'.format(mod_name, name)
-            update_if_requested(mod.repo, full_name, searched_submodules)
-        else:
+    else:
+        for mod in rpo.submodules:
+            if mod.name not in searched_submodules:
+                searched_submodules.append(mod.name)
+                mod_name = mod.name.split('/')[-1]
+                full_name = '{}, submodule of {}'.format(mod_name, name)
+                update_if_requested(mod.repo, full_name, searched_submodules)
+        if not changed:
             print 'No update necessary in {}'.format(name)
 
 
